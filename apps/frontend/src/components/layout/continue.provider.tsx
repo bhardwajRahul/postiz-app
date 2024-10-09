@@ -82,12 +82,15 @@ export const ContinueProvider: FC = () => {
                 date: dayjs(),
                 value: [],
                 integration: {
+                  display: '',
                   time: [{time: 0}],
                   id: continueId,
                   type: '',
                   name: '',
                   picture: '',
                   inBetweenSteps: true,
+                  changeNickName: false,
+                  changeProfilePicture: false,
                   identifier: added,
                 },
               }}

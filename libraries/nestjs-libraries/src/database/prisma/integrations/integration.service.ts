@@ -21,9 +21,11 @@ import { timer } from '@gitroom/helpers/utils/timer';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
 import { RefreshToken } from '@gitroom/nestjs-libraries/integrations/social.abstract';
 import { IntegrationTimeDto } from '@gitroom/nestjs-libraries/dtos/integrations/integration.time.dto';
+import { UploadFactory } from '@gitroom/nestjs-libraries/upload/upload.factory';
 
 @Injectable()
 export class IntegrationService {
+  private storage = UploadFactory.createStorage();
   constructor(
     private _integrationRepository: IntegrationRepository,
     private _integrationManager: IntegrationManager,
@@ -47,15 +49,10 @@ export class IntegrationService {
     username?: string,
     isBetweenSteps = false,
     refresh?: string,
-    timezone?: number
+    timezone?: number,
+    customInstanceDetails?: string
   ) {
-    const loadImage = await axios.get(picture, { responseType: 'arraybuffer' });
-    const uploadedPicture = await simpleUpload(
-      loadImage.data,
-      `${makeId(10)}.png`,
-      'image/png'
-    );
-
+    const uploadedPicture = await this.storage.uploadSimple(picture);
     return this._integrationRepository.createOrUpdateIntegration(
       org,
       name,
@@ -69,7 +66,8 @@ export class IntegrationService {
       username,
       isBetweenSteps,
       refresh,
-      timezone
+      timezone,
+      customInstanceDetails
     );
   }
 
@@ -84,6 +82,10 @@ export class IntegrationService {
       user,
       org
     );
+  }
+
+  updateNameAndUrl(id: string, name: string, url: string) {
+    return this._integrationRepository.updateNameAndUrl(id, name, url);
   }
 
   getIntegrationById(org: string, id: string) {
